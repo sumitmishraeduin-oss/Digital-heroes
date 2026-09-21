@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Heroes - Golf Performance & Charity Draw Platform</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+              900: '#4c1d95',
+            },
+            charity: {
+              50: '#ecfdf5',
+              500: '#10b981',
+              600: '#059669',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    .hero-mesh {
+      background: radial-gradient(circle at 10% 20%, rgba(124, 58, 237, 0.12) 0%, transparent 40%),
+                  radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.12) 0%, transparent 40%);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col hero-mesh">
+
+  <!-- TOP ROLE SWITCHER BAR (EVALUATION / DEMO BAR) -->
+  <header class="bg-slate-900 text-slate-100 text-xs py-2 px-4 sticky top-0 z-50 shadow-md">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center space-x-2">
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="font-semibold tracking-wider text-slate-300 uppercase">PRD Role Selector:</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="switchRole('public')" id="role-btn-public" class="px-2.5 py-1 rounded border border-slate-700 hover:bg-slate-800 transition">
+          Public Visitor
+        </button>
+        <button onclick="switchRole('user')" id="role-btn-user" class="px-2.5 py-1 rounded bg-brand-600 text-white font-medium border border-brand-500 shadow-sm transition">
+          Subscriber (User)
+        </button>
+        <button onclick="switchRole('admin')" id="role-btn-admin" class="px-2.5 py-1 rounded border border-slate-700 hover:bg-slate-800 transition">
+          Admin Portal
+        </button>
+      </div>
+      <div class="text-slate-400 text-[11px]">
+        Current Role: <span id="current-role-badge" class="text-emerald-400 font-semibold uppercase">Subscriber</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN NAVIGATION -->
+  <nav class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-9 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <!-- Logo -->
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="navigate('home')">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-emerald-500 flex items-center justify-center text-white font-extrabold text-xl shadow-md">
+            DH
+          </div>
+          <div>
+            <span class="text-xl font-bold tracking-tight text-slate-900">Digital<span class="text-brand-600">Heroes</span></span>
+            <span class="block text-[10px] text-slate-400 uppercase tracking-widest font-semibold">Play. Win. Give Back.</span>
+          </div>
+        </div>
+
+        <!-- Desktop Links -->
+        <div class="hidden md:flex items-center space-x-6">
+          <button onclick="navigate('home')" class="text-sm font-medium text-slate-600 hover:text-brand-600 transition">Home</button>
+          <button onclick="navigate('charities')" class="text-sm font-medium text-slate-600 hover:text-brand-600 transition">Charity Directory</button>
+          <button onclick="navigate('draws')" class="text-sm font-medium text-slate-600 hover:text-brand-600 transition">Draw Pool & Rules</button>
+          <button id="nav-dashboard-link" onclick="navigate('dashboard')" class="text-sm font-medium text-slate-600 hover:text-brand-600 transition">My Dashboard</button>
+          <button id="nav-admin-link" onclick="navigate('admin')" class="hidden text-sm font-medium text-purple-700 font-semibold hover:text-purple-900 transition">Admin Panel</button>
+        </div>
+
+        <!-- Right Action Button -->
+        <div class="flex items-center space-x-3">
+          <button id="sub-cta-btn" onclick="openSubscriptionModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 text-white text-sm font-semibold hover:opacity-95 shadow-md shadow-brand-500/20 transition">
+            Subscribe Now
+          </button>
+          <div id="user-avatar-badge" class="flex items-center space-x-2 pl-2 border-l border-slate-200">
+            <span class="w-8 h-8 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center text-xs">SK</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 hidden max-w-sm px-4 py-3 rounded-xl shadow-lg border text-sm flex items-center space-x-2 transition"></div>
+
+  <!-- MAIN CONTENT VIEW ROUTER -->
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+
+    <!-- VIEW 1: HOME PAGE -->
+    <section id="view-home" class="space-y-16">
+      <!-- Hero Section -->
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-8 sm:p-14 shadow-2xl">
+        <div class="relative z-10 max-w-2xl space-y-6">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold tracking-wide border border-emerald-500/30">
+            <span>💚 Purpose-Driven Golf Performance Engine</span>
+          </div>
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
+            Elevate Your Game. <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-brand-400">Empower Real Lives.</span>
+          </h1>
+          <p class="text-slate-300 text-base sm:text-lg">
+            Say goodbye to traditional golf platforms. Log your Stableford scores, enter fair algorithmic monthly draws, and support verified causes directly with every round.
+          </p>
+          <div class="flex flex-wrap gap-4 pt-2">
+            <button onclick="navigate('dashboard')" class="px-6 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-sm shadow-lg transition">
+              Track 5 Scores & Enter Draw
+            </button>
+            <button onclick="navigate('charities')" class="px-6 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm border border-slate-700 transition">
+              Explore 4+ Partner Charities
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="glass-card p-6 rounded-2xl">
+          <span class="text-xs font-bold text-slate-400 uppercase">Live Monthly Pool</span>
+          <p id="home-stat-pool" class="text-3xl font-extrabold text-brand-600 mt-2">$3,420</p>
+          <span class="text-xs text-slate-500 mt-1 block">Dynamic subscription share</span>
+        </div>
+        <div class="glass-card p-6 rounded-2xl">
+          <span class="text-xs font-bold text-slate-400 uppercase">Charity Contributions</span>
+          <p id="home-stat-charity" class="text-3xl font-extrabold text-emerald-600 mt-2">$1,280</p>
+          <span class="text-xs text-slate-500 mt-1 block">Min 10% of every subscriber fee</span>
+        </div>
+        <div class="glass-card p-6 rounded-2xl">
+          <span class="text-xs font-bold text-slate-400 uppercase">Active Hero Subscribers</span>
+          <p id="home-stat-subs" class="text-3xl font-extrabold text-slate-900 mt-2">171</p>
+          <span class="text-xs text-slate-500 mt-1 block">Monthly & Yearly participants</span>
+        </div>
+        <div class="glass-card p-6 rounded-2xl">
+          <span class="text-xs font-bold text-slate-400 uppercase">Rolling Jackpot</span>
+          <p id="home-stat-jackpot" class="text-3xl font-extrabold text-amber-500 mt-2">$2,150</p>
+          <span class="text-xs text-slate-500 mt-1 block">5-Number match pool rollover</span>
+        </div>
+      </div>
+
+      <!-- How It Works Section -->
+      <div class="space-y-8">
+        <div class="text-center max-w-2xl mx-auto">
+          <h2 class="text-3xl font-extrabold text-slate-900">How Digital Heroes Works</h2>
+          <p class="text-slate-500 mt-2 text-sm">A seamless four-step cycle connecting personal play with high-impact giving.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 space-y-3">
+            <span class="w-8 h-8 rounded-lg bg-brand-100 text-brand-700 font-bold flex items-center justify-center">1</span>
+            <h3 class="font-bold text-slate-900">1. Subscribe & Pledge</h3>
+            <p class="text-slate-600 text-xs leading-relaxed">Choose a Monthly ($20) or Yearly ($200) tier. At least 10% is directly routed to your chosen charity.</p>
+          </div>
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 space-y-3">
+            <span class="w-8 h-8 rounded-lg bg-brand-100 text-brand-700 font-bold flex items-center justify-center">2</span>
+            <h3 class="font-bold text-slate-900">2. Log Latest 5 Scores</h3>
+            <p class="text-slate-600 text-xs leading-relaxed">Submit Stableford scores (1-45). Our rolling engine automatically keeps your newest 5 verified rounds.</p>
+          </div>
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 space-y-3">
+            <span class="w-8 h-8 rounded-lg bg-brand-100 text-brand-700 font-bold flex items-center justify-center">3</span>
+            <h3 class="font-bold text-slate-900">3. Monthly Draw Engine</h3>
+            <p class="text-slate-600 text-xs leading-relaxed">Draw matches your 5 scores against 5 drawn numbers (3-tier prize pool: 40%, 35%, and 25%).</p>
+          </div>
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 space-y-3">
+            <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center">4</span>
+            <h3 class="font-bold text-slate-900">4. Verify & Celebrate</h3>
+            <p class="text-slate-600 text-xs leading-relaxed">Winners upload official golf platform screenshot proof. Admin approves payouts directly.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spotlight Charity -->
+      <div class="rounded-3xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-teal-50 to-white p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div class="space-y-4 max-w-xl">
+          <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 font-semibold text-xs uppercase">Spotlight Charity of the Month</span>
+          <h3 class="text-2xl font-bold text-slate-900">Green Hope Junior Golf Foundation</h3>
+          <p class="text-slate-600 text-sm">Providing underprivileged youth with equipment, professional coaching, and education scholarships through golf tournaments.</p>
+          <div class="flex items-center gap-4 text-xs font-semibold text-emerald-800">
+            <span>⛳ Next Charity Golf Day: Nov 12</span>
+            <span>🤝 $14,800 Raised</span>
+          </div>
+        </div>
+        <button onclick="navigate('charities')" class="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition whitespace-nowrap">
+          View All Charities
+        </button>
+      </div>
+    </section>
+
+    <!-- VIEW 2: USER DASHBOARD -->
+    <section id="view-dashboard" class="hidden space-y-8">
+      <!-- Dashboard Header -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">Subscriber Dashboard</h1>
+          <p class="text-slate-500 text-xs mt-0.5">Manage your active scores, subscription, and charity distribution.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span id="dash-plan-badge" class="px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+            Active: Monthly Plan ($20/mo)
+          </span>
+          <button onclick="openSubscriptionModal()" class="text-xs text-brand-600 font-semibold hover:underline">
+            Manage Plan
+          </button>
+        </div>
+      </div>
+
+      <!-- Winner Claim Alert Banner (Dynamic) -->
+      <div id="winner-banner" class="hidden bg-gradient-to-r from-amber-500 to-orange-500 text-white p-5 rounded-2xl shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <h4 class="font-extrabold text-base">🎉 Congratulations! You have a Winning Match!</h4>
+          <p class="text-xs text-amber-100 mt-1">You matched 4 numbers in the September Draw ($380 payout). Upload proof to release funds.</p>
+        </div>
+        <button onclick="openProofModal()" class="px-4 py-2 bg-white text-slate-900 text-xs font-bold rounded-xl shadow hover:bg-amber-50 transition whitespace-nowrap">
+          Upload Golf Proof
+        </button>
+      </div>
+
+      <!-- Dashboard Main Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Column 1 & 2: Score Management (PRD Core Section 05) -->
+        <div class="lg:col-span-2 space-y-6">
+          <div class="glass-card p-6 rounded-2xl space-y-6 shadow-sm">
+            <div class="flex justify-between items-center">
+              <div>
+                <h2 class="text-lg font-bold text-slate-900">Score Management System</h2>
+                <p class="text-slate-500 text-xs">Last 5 scores retained in Stableford format (1 - 45). Newest score automatically rolls out oldest.</p>
+              </div>
+              <span class="text-xs font-bold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg">Max: 5 Scores</span>
+            </div>
+
+            <!-- Score Entry Form -->
+            <form id="score-form" onsubmit="handleScoreSubmit(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Score (Stableford: 1 - 45)</label>
+                <input type="number" id="input-score-val" min="1" max="45" required placeholder="e.g. 36" class="w-full text-sm px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Date Played</label>
+                <input type="date" id="input-score-date" required class="w-full text-sm px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500">
+              </div>
+              <div>
+                <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition">
+                  + Add / Replace Score
+                </button>
+              </div>
+            </form>
+
+            <!-- Rolling 5 Scores Display Table -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead>
+                  <tr class="border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase">
+                    <th class="py-2.5">Slot</th>
+                    <th class="py-2.5">Date (Reverse Chronological)</th>
+                    <th class="py-2.5">Stableford Score</th>
+                    <th class="py-2.5">Status</th>
+                    <th class="py-2.5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="scores-table-body" class="divide-y divide-slate-100 font-medium text-slate-700">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+            <p class="text-[11px] text-slate-400 italic">* Duplicate scores on the same date are restricted. Existing rounds on that day can only be edited or removed.</p>
+          </div>
+
+          <!-- Participation & Recent Draw Results -->
+          <div class="glass-card p-6 rounded-2xl space-y-4">
+            <h3 class="text-base font-bold text-slate-900">Participation & Draw History</h3>
+            <div class="space-y-3" id="user-draw-history">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 3: Subscription & Charity Overview -->
+        <div class="space-y-6">
+          <!-- Charity Contribution Card -->
+          <div class="glass-card p-6 rounded-2xl space-y-4">
+            <div class="flex justify-between items-center">
+              <h3 class="text-sm font-bold uppercase text-slate-500 tracking-wider">Charity Impact</h3>
+              <span class="px-2 py-0.5 text-[11px] font-bold bg-emerald-100 text-emerald-800 rounded">Min 10%</span>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400">Current Recipient:</p>
+              <h4 id="dash-charity-name" class="font-bold text-slate-900 text-base mt-0.5">Green Hope Junior Golf Foundation</h4>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs font-semibold mb-1">
+                <span>Pledged Share:</span>
+                <span id="dash-charity-percent" class="text-emerald-600 font-bold">15%</span>
+              </div>
+              <input type="range" id="dash-charity-slider" min="10" max="50" step="1" value="15" oninput="updateCharityPercentage(this.value)" class="w-full accent-emerald-600 cursor-pointer">
+              <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                <span>10% (Default)</span>
+                <span>25%</span>
+                <span>50% (Heroic)</span>
+              </div>
+            </div>
+            <div class="bg-emerald-50/70 p-3 rounded-xl border border-emerald-100 text-xs text-emerald-900">
+              Your contribution this month: <strong id="dash-charity-amount">$3.00</strong>
+            </div>
+            <button onclick="navigate('charities')" class="w-full text-center text-xs text-brand-600 font-semibold hover:underline">
+              Change Charity Recipient →
+            </button>
+          </div>
+
+          <!-- Winnings & Payout Status -->
+          <div class="glass-card p-6 rounded-2xl space-y-4">
+            <h3 class="text-sm font-bold uppercase text-slate-500 tracking-wider">Winnings Overview</h3>
+            <div class="flex justify-between items-center py-2 border-b border-slate-100">
+              <span class="text-xs text-slate-600">Total Won To Date</span>
+              <span id="dash-total-won" class="font-extrabold text-slate-900 text-lg">$380.00</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-slate-100">
+              <span class="text-xs text-slate-600">Payout Verification</span>
+              <span id="dash-payout-status" class="px-2.5 py-1 text-xs font-bold rounded-md bg-amber-100 text-amber-800">Pending Review</span>
+            </div>
+            <div class="text-[11px] text-slate-500 leading-relaxed">
+              * Verification requires proof screenshot from official golf platform (e.g. Golf Genius, WHS, Club Portal).
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- VIEW 3: CHARITY DIRECTORY -->
+    <section id="view-charities" class="hidden space-y-8">
+      <div class="max-w-2xl">
+        <h1 class="text-3xl font-extrabold text-slate-900">Partner Charity Directory</h1>
+        <p class="text-slate-500 text-sm mt-1">Every subscriber channels a minimum of 10% toward verified humanitarian and ecological causes.</p>
+      </div>
+
+      <!-- Search & Filters -->
+      <div class="flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <div class="w-full sm:w-80">
+          <input type="text" id="charity-search" oninput="filterCharities()" placeholder="Search charities or causes..." class="w-full text-sm px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500">
+        </div>
+        <div class="flex items-center space-x-2 overflow-x-auto w-full sm:w-auto pb-1">
+          <button onclick="setCharityFilter('all')" class="charity-filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-900 text-white" data-category="all">All</button>
+          <button onclick="setCharityFilter('Youth')" class="charity-filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200" data-category="Youth">Youth & Education</button>
+          <button onclick="setCharityFilter('Health')" class="charity-filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200" data-category="Health">Mental Health</button>
+          <button onclick="setCharityFilter('Veterans')" class="charity-filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200" data-category="Veterans">Veterans Support</button>
+          <button onclick="setCharityFilter('Eco')" class="charity-filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200" data-category="Eco">Environment</button>
+        </div>
+      </div>
+
+      <!-- Charity Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="charities-grid">
+        <!-- Dynamically injected -->
+      </div>
+    </section>
+
+    <!-- VIEW 4: DRAW ENGINE & PRIZE POOL BREAKDOWN -->
+    <section id="view-draws" class="hidden space-y-10">
+      <div>
+        <h1 class="text-3xl font-extrabold text-slate-900">Draw & Reward Engine</h1>
+        <p class="text-slate-500 text-sm mt-1">Transparent prize pools generated proportionally from active subscriptions.</p>
+      </div>
+
+      <!-- Prize Pool Architecture Card (PRD § 07) -->
+      <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <span class="text-xs font-bold text-brand-600 uppercase tracking-wider">Automated Distribution</span>
+            <h2 class="text-xl font-bold text-slate-900">Prize Pool Logic Architecture</h2>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400">Calculated Current Pool</span>
+            <div class="text-2xl font-black text-slate-900" id="draws-live-pool">$3,420.00</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="border border-purple-200 bg-purple-50/50 p-5 rounded-2xl space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="font-extrabold text-purple-900 text-lg">Tier 1: 5-Match</span>
+              <span class="px-2 py-0.5 rounded bg-purple-200 text-purple-800 text-xs font-bold">40% Share</span>
+            </div>
+            <p class="text-xs text-purple-700">Matches all 5 drawn numbers. Unclaimed jackpot automatically rolls over to the next monthly cycle.</p>
+            <div class="text-sm font-bold text-purple-900 pt-2 border-t border-purple-200">
+              Current Pool: <span id="tier1-pool-val">$1,368.00</span> + Rollover: <span class="text-amber-600">$2,150.00</span>
+            </div>
+          </div>
+
+          <div class="border border-blue-200 bg-blue-50/50 p-5 rounded-2xl space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="font-extrabold text-blue-900 text-lg">Tier 2: 4-Match</span>
+              <span class="px-2 py-0.5 rounded bg-blue-200 text-blue-800 text-xs font-bold">35% Share</span>
+            </div>
+            <p class="text-xs text-blue-700">Matches 4 out of 5 drawn numbers. Shared equally among all eligible winners. No rollover.</p>
+            <div class="text-sm font-bold text-blue-900 pt-2 border-t border-blue-200">
+              Current Pool: <span id="tier2-pool-val">$1,197.00</span>
+            </div>
+          </div>
+
+          <div class="border border-emerald-200 bg-emerald-50/50 p-5 rounded-2xl space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="font-extrabold text-emerald-900 text-lg">Tier 3: 3-Match</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-200 text-emerald-800 text-xs font-bold">25% Share</span>
+            </div>
+            <p class="text-xs text-emerald-700">Matches 3 out of 5 drawn numbers. Distributed proportionally among winners.</p>
+            <div class="text-sm font-bold text-emerald-900 pt-2 border-t border-emerald-200">
+              Current Pool: <span id="tier3-pool-val">$855.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Latest Published Draw Numbers -->
+      <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-6">
+        <h3 class="text-lg font-bold text-slate-900">Official Draw Results</h3>
+        <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-slate-900 text-white">
+          <div>
+            <span class="text-xs text-emerald-400 uppercase font-semibold">September 2026 Monthly Draw</span>
+            <div class="text-sm text-slate-300">Published on Sept 15, 2026</div>
+          </div>
+          <div class="flex items-center space-x-3">
+            <span class="w-10 h-10 rounded-full bg-brand-600 font-black text-white flex items-center justify-center text-sm shadow">14</span>
+            <span class="w-10 h-10 rounded-full bg-brand-600 font-black text-white flex items-center justify-center text-sm shadow">22</span>
+            <span class="w-10 h-10 rounded-full bg-brand-600 font-black text-white flex items-center justify-center text-sm shadow">28</span>
+            <span class="w-10 h-10 rounded-full bg-brand-600 font-black text-white flex items-center justify-center text-sm shadow">34</span>
+            <span class="w-10 h-10 rounded-full bg-brand-600 font-black text-white flex items-center justify-center text-sm shadow">41</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 5: ADMIN DASHBOARD (PRD § 11) -->
+    <section id="view-admin" class="hidden space-y-8">
+      <div class="border-b border-slate-200 pb-5 flex justify-between items-center">
+        <div>
+          <h1 class="text-2xl font-black text-slate-900">Administrator Control Surface</h1>
+          <p class="text-slate-500 text-xs">Platform execution engine, user control, draw orchestration, and payouts.</p>
+        </div>
+        <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-bold">Admin Level Access</span>
+      </div>
+
+      <!-- Admin Tab Switcher -->
+      <div class="flex space-x-2 border-b border-slate-200 text-sm">
+        <button onclick="switchAdminTab('users')" id="admin-tab-btn-users" class="pb-3 px-4 font-semibold text-brand-600 border-b-2 border-brand-600">Users & Scores</button>
+        <button onclick="switchAdminTab('draws')" id="admin-tab-btn-draws" class="pb-3 px-4 font-semibold text-slate-500 hover:text-slate-800">Draw Operations</button>
+        <button onclick="switchAdminTab('winners')" id="admin-tab-btn-winners" class="pb-3 px-4 font-semibold text-slate-500 hover:text-slate-800">Winner Verification</button>
+        <button onclick="switchAdminTab('charity')" id="admin-tab-btn-charity" class="pb-3 px-4 font-semibold text-slate-500 hover:text-slate-800">Charity CMS</button>
+      </div>
+
+      <!-- Tab 1: User Management -->
+      <div id="admin-tab-users" class="space-y-4">
+        <div class="glass-card p-6 rounded-2xl">
+          <h3 class="text-base font-bold text-slate-900 mb-4">Subscriber User Registry</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100 text-slate-600 uppercase">
+                <tr>
+                  <th class="p-3">User</th>
+                  <th class="p-3">Plan</th>
+                  <th class="p-3">Selected Charity</th>
+                  <th class="p-3">Pledged %</th>
+                  <th class="p-3">Score Count</th>
+                  <th class="p-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-user-table" class="divide-y divide-slate-100">
+                <!-- Dynamically filled -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Draw Orchestration & Simulation -->
+      <div id="admin-tab-draws" class="hidden space-y-6">
+        <div class="glass-card p-6 rounded-2xl space-y-6">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Run Monthly Draw Simulation & Publishing</h3>
+            <p class="text-slate-500 text-xs">Choose draw algorithmic logic: pure random vs. score-frequency weighted simulation.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Draw Algorithm Mode</label>
+              <select id="draw-mode-select" class="w-full text-sm p-2.5 rounded-xl border border-slate-300">
+                <option value="random">Standard Random (1 - 45)</option>
+                <option value="weighted">Algorithmic - Weighted by Score Frequency</option>
+              </select>
+            </div>
+            <div class="flex items-end">
+              <button onclick="runDrawSimulation()" class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm rounded-xl transition">
+                ⚡ Generate & Simulate Draw
+              </button>
+            </div>
+          </div>
+
+          <!-- Simulation Result Box -->
+          <div id="sim-result-box" class="hidden p-5 rounded-2xl bg-slate-900 text-white space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-emerald-400 font-bold uppercase">Simulation Results Preview</span>
+              <button onclick="publishOfficialDraw()" class="px-4 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold text-xs rounded-lg transition">
+                Publish Official Draw
+              </button>
+            </div>
+            <div class="flex items-center space-x-3">
+              <span class="text-xs text-slate-400">Drawn 5 Numbers:</span>
+              <div id="sim-drawn-balls" class="flex space-x-2"></div>
+            </div>
+            <div class="grid grid-cols-3 gap-3 text-center text-xs pt-3 border-t border-slate-800">
+              <div>
+                <span class="text-slate-400">5-Matches:</span>
+                <p id="sim-match-5" class="text-base font-bold text-amber-400">0 Winners</p>
+              </div>
+              <div>
+                <span class="text-slate-400">4-Matches:</span>
+                <p id="sim-match-4" class="text-base font-bold text-blue-400">1 Winner</p>
+              </div>
+              <div>
+                <span class="text-slate-400">3-Matches:</span>
+                <p id="sim-match-3" class="text-base font-bold text-emerald-400">6 Winners</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Winner Verification (PRD § 09) -->
+      <div id="admin-tab-winners" class="hidden space-y-4">
+        <div class="glass-card p-6 rounded-2xl space-y-4">
+          <div class="flex justify-between items-center">
+            <h3 class="text-base font-bold text-slate-900">Winner Proof Submissions & Verification Queue</h3>
+            <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded">1 Pending Audit</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100 text-slate-600 uppercase">
+                <tr>
+                  <th class="p-3">User</th>
+                  <th class="p-3">Match Tier</th>
+                  <th class="p-3">Amount</th>
+                  <th class="p-3">Proof Screenshot</th>
+                  <th class="p-3">Audit Status</th>
+                  <th class="p-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-winner-table" class="divide-y divide-slate-100">
+                <!-- Dynamically injected -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Charity CMS -->
+      <div id="admin-tab-charity" class="hidden space-y-6">
+        <div class="glass-card p-6 rounded-2xl space-y-4">
+          <div class="flex justify-between items-center">
+            <h3 class="text-base font-bold text-slate-900">Manage Listed Charities</h3>
+            <button onclick="promptNewCharity()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold">
+              + Add New Charity
+            </button>
+          </div>
+          <div class="divide-y divide-slate-100" id="admin-charity-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: SUBSCRIPTION CHECKOUT -->
+  <div id="sub-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative">
+      <button onclick="closeSubscriptionModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+      <div>
+        <h3 class="text-xl font-bold text-slate-900">Choose Membership Tier</h3>
+        <p class="text-slate-500 text-xs mt-1">Unlock 5-score entry, monthly draws, and active charity sponsorship.</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div id="plan-opt-monthly" onclick="selectPlan('monthly')" class="p-4 rounded-2xl border-2 border-brand-600 bg-brand-50/50 cursor-pointer space-y-2">
+          <span class="text-xs font-bold text-brand-700 uppercase">Monthly</span>
+          <div class="text-2xl font-black text-slate-900">$20 <span class="text-xs text-slate-500 font-normal">/mo</span></div>
+          <p class="text-[11px] text-slate-500">Full platform entry & monthly draw ticket.</p>
+        </div>
+        <div id="plan-opt-yearly" onclick="selectPlan('yearly')" class="p-4 rounded-2xl border-2 border-slate-200 cursor-pointer space-y-2 hover:border-slate-300">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-slate-700 uppercase">Yearly</span>
+            <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">Save 17%</span>
+          </div>
+          <div class="text-2xl font-black text-slate-900">$200 <span class="text-xs text-slate-500 font-normal">/yr</span></div>
+          <p class="text-[11px] text-slate-500">Includes 12 draws + priority charity matching.</p>
+        </div>
+      </div>
+
+      <!-- Charity Pledge slider in modal -->
+      <div class="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+        <div class="flex justify-between text-xs font-semibold">
+          <span>Pledge to Selected Charity:</span>
+          <span id="modal-charity-pct-label" class="text-emerald-600 font-bold">15%</span>
+        </div>
+        <input type="range" min="10" max="50" value="15" oninput="document.getElementById('modal-charity-pct-label').innerText = this.value + '%'" class="w-full accent-emerald-600">
+        <span class="text-[10px] text-slate-400 block text-center">* Enforced minimum 10% per PRD rules</span>
+      </div>
+
+      <button onclick="confirmSubscription()" class="w-full py-3.5 bg-gradient-to-r from-brand-600 to-indigo-600 text-white font-bold text-sm rounded-xl shadow-lg hover:opacity-95 transition">
+        Confirm Subscription (Simulated Stripe Gateway)
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: PROOF UPLOAD -->
+  <div id="proof-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl relative">
+      <button onclick="closeProofModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+      <div>
+        <h3 class="text-lg font-bold text-slate-900">Upload Golf Platform Proof</h3>
+        <p class="text-slate-500 text-xs mt-1">Upload a screenshot from your official golf handicapping system or tournament card.</p>
+      </div>
+      <div class="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center space-y-2">
+        <div class="text-2xl">📸</div>
+        <input type="file" id="proof-file-input" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
+      </div>
+      <button onclick="submitProofFile()" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl transition">
+        Submit for Admin Review
+      </button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-slate-200 mt-20 py-8">
+    <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 space-y-2">
+      <p class="font-medium text-slate-700">Digital Heroes &bull; Golf Performance & Charity Draw Platform (2026 PRD Edition)</p>
+      <p>Built for Full-Stack Development Selection Process &bull; Single File Architecture &bull; Vercel & Supabase Ready</p>
+    </div>
+  </footer>
+
+  <!-- SCRIPT: APPLICATION LOGIC -->
+  <script>
+    /* ==========================================================================
+       APPLICATION STATE (PRD DATA STORAGE)
+       ========================================================================== */
+    const state = {
+      role: 'user', // 'public', 'user', 'admin'
+      user: {
+        id: 'usr_01',
+        name: 'Sumit Kumar',
+        email: 'sumit.kumaraids23@smslucknow.ac.in',
+        plan: 'Monthly',
+        planRate: 20,
+        subscribed: true,
+        charityId: 'ch_01',
+        charityPercentage: 15,
+        totalWon: 380.00,
+        payoutStatus: 'Pending', // 'Pending', 'Verified', 'Paid'
+        proofUploaded: true,
+        scores: [
+          { id: 'sc_1', score: 38, date: '2026-09-18' },
+          { id: 'sc_2', score: 41, date: '2026-09-14' },
+          { id: 'sc_3', score: 34, date: '2026-09-08' },
+          { id: 'sc_4', score: 28, date: '2026-09-02' },
+          { id: 'sc_5', score: 36, date: '2026-08-27' }
+        ]
+      },
+      metrics: {
+        totalSubscribers: 171,
+        livePool: 3420.00,
+        jackpotRollover: 2150.00,
+        totalCharityRaised: 1280.00
+      },
+      charities: [
+        {
+          id: 'ch_01',
+          name: 'Green Hope Junior Golf Foundation',
+          category: 'Youth',
+          description: 'Empowering underprivileged young athletes with equipment, professional training, and academic scholarships.',
+          nextEvent: 'Junior Charity Invitational (Oct 28)',
+          raised: 14800,
+          image: 'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=600&q=80'
+        },
+        {
+          id: 'ch_02',
+          name: 'MindFairway Mental Health Initiative',
+          category: 'Health',
+          description: 'Therapeutic outdoor and golf rehabilitation programs supporting clinical anxiety and trauma recovery.',
+          nextEvent: 'Peace on the Greens Day (Nov 04)',
+          raised: 9240,
+          image: 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?auto=format&fit=crop&w=600&q=80'
+        },
+        {
+          id: 'ch_03',
+          name: 'HeroLinks Veterans Wellness',
+          category: 'Veterans',
+          description: 'Adaptive sports therapy, companionship rounds, and vocational reintegration for wounded service personnel.',
+          nextEvent: 'Veterans Open Cup (Nov 15)',
+          raised: 18500,
+          image: 'https://images.unsplash.com/photo-1593111774642-a15555410948?auto=format&fit=crop&w=600&q=80'
+        },
+        {
+          id: 'ch_04',
+          name: 'CleanGreens Reforestation Project',
+          category: 'Eco',
+          description: 'Planting 10 native trees for every logged round to restore degraded habitats surrounding sports corridors.',
+          nextEvent: 'Earth Tee Plantation Drive (Dec 02)',
+          raised: 6300,
+          image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80'
+        }
+      ],
+      selectedPlanModal: 'monthly',
+      currentCharityFilter: 'all'
+    };
+
+    /* ==========================================================================
+       ROUTING & ROLE MANAGEMENT
+       ========================================================================== */
+    function navigate(viewName) {
+      const views = ['home', 'dashboard', 'charities', 'draws', 'admin'];
+      views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) el.classList.add('hidden');
+      });
+
+      // Role permission guards
+      if (viewName === 'admin' && state.role !== 'admin') {
+        showToast('Admin privilege required. Switched to Admin role for inspection.');
+        switchRole('admin');
+      }
+
+      if (viewName === 'dashboard' && state.role === 'public') {
+        showToast('Subscribers only. Please subscribe or switch to Subscriber role.');
+        openSubscriptionModal();
+        viewName = 'home';
+      }
+
+      const target = document.getElementById(`view-${viewName}`);
+      if (target) {
+        target.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function switchRole(role) {
+      state.role = role;
+      document.getElementById('current-role-badge').innerText = role.toUpperCase();
+
+      // Update switcher buttons UI
+      ['public', 'user', 'admin'].forEach(r => {
+        const btn = document.getElementById(`role-btn-${r}`);
+        if (r === role) {
+          btn.className = "px-2.5 py-1 rounded bg-brand-600 text-white font-medium border border-brand-500 shadow-sm transition";
+        } else {
+          btn.className = "px-2.5 py-1 rounded border border-slate-700 hover:bg-slate-800 transition text-slate-300";
+        }
+      });
+
+      // Show/Hide Admin Nav link
+      const adminNav = document.getElementById('nav-admin-link');
+      if (role === 'admin') {
+        adminNav.classList.remove('hidden');
+      } else {
+        adminNav.classList.add('hidden');
+      }
+
+      if (role === 'admin') {
+        navigate('admin');
+      } else if (role === 'user') {
+        navigate('dashboard');
+      } else {
+        navigate('home');
+      }
+      renderAll();
+    }
+
+    /* ==========================================================================
+       SCORE ENGINE (PRD § 05)
+       - Stableford 1-45
+       - Max 5 rolling scores (newest replaces oldest)
+       - Strict 1 score per date rule
+       - Reverse chronological order
+       ========================================================================== */
+    function handleScoreSubmit(e) {
+      e.preventDefault();
+      const scoreInput = document.getElementById('input-score-val');
+      const dateInput = document.getElementById('input-score-date');
+
+      const score = parseInt(scoreInput.value, 10);
+      const date = dateInput.value;
+
+      if (isNaN(score) || score < 1 || score > 45) {
+        showToast('Invalid score! Stableford score must be between 1 and 45.');
+        return;
+      }
+
+      if (!date) {
+        showToast('Please select a valid date.');
+        return;
+      }
+
+      // Check duplicate date rule
+      const existingIndex = state.user.scores.findIndex(s => s.date === date);
+      if (existingIndex !== -1) {
+        const confirmOverwrite = confirm(`You already have a score on ${date}. Would you like to update that round to ${score}?`);
+        if (confirmOverwrite) {
+          state.user.scores[existingIndex].score = score;
+          showToast(`Score updated for ${date}.`);
+        } else {
+          return;
+        }
+      } else {
+        // Add new score
+        const newScoreObj = {
+          id: 'sc_' + Date.now(),
+          score: score,
+          date: date
+        };
+        state.user.scores.push(newScoreObj);
+
+        // Sort reverse chronologically
+        state.user.scores.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        // Rolling 5 rule: if > 5, remove the oldest (last in reverse chronological order)
+        if (state.user.scores.length > 5) {
+          const removed = state.user.scores.pop();
+          showToast(`Rolling 5 active: Oldest score from ${removed.date} was replaced.`);
+        } else {
+          showToast('Score successfully recorded!');
+        }
+      }
+
+      // Reset inputs & render
+      scoreInput.value = '';
+      dateInput.value = '';
+      renderScores();
+    }
+
+    function deleteScore(id) {
+      state.user.scores = state.user.scores.filter(s => s.id !== id);
+      showToast('Score removed.');
+      renderScores();
+    }
+
+    function renderScores() {
+      const tbody = document.getElementById('scores-table-body');
+      tbody.innerHTML = '';
+
+      // Ensure sorted reverse chronologically
+      state.user.scores.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      if (state.user.scores.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400">No golf scores recorded yet. Add your first score above.</td></tr>`;
+        return;
+      }
+
+      state.user.scores.forEach((sc, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition";
+        tr.innerHTML = `
+          <td class="py-3 font-bold text-slate-400">#${idx + 1}</td>
+          <td class="py-3 font-semibold text-slate-800">${sc.date}</td>
+          <td class="py-3">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black bg-brand-100 text-brand-700">
+              ${sc.score} pts
+            </span>
+          </td>
+          <td class="py-3 text-xs text-emerald-600 font-medium">✓ Active in Draw</td>
+          <td class="py-3 text-right space-x-2">
+            <button onclick="deleteScore('${sc.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-semibold">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    /* ==========================================================================
+       CHARITY SYSTEM (PRD § 08)
+       ========================================================================== */
+    function updateCharityPercentage(val) {
+      state.user.charityPercentage = parseInt(val, 10);
+      document.getElementById('dash-charity-percent').innerText = `${val}%`;
+      const monthlyPledge = ((state.user.planRate * state.user.charityPercentage) / 100).toFixed(2);
+      document.getElementById('dash-charity-amount').innerText = `$${monthlyPledge}`;
+    }
+
+    function setCharityFilter(cat) {
+      state.currentCharityFilter = cat;
+      document.querySelectorAll('.charity-filter-btn').forEach(btn => {
+        if (btn.getAttribute('data-category') === cat) {
+          btn.className = "charity-filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-900 text-white";
+        } else {
+          btn.className = "charity-filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200";
+        }
+      });
+      renderCharities();
+    }
+
+    function filterCharities() {
+      renderCharities();
+    }
+
+    function selectCharityForUser(charityId) {
+      state.user.charityId = charityId;
+      const found = state.charities.find(c => c.id === charityId);
+      if (found) {
+        document.getElementById('dash-charity-name').innerText = found.name;
+        showToast(`Charity updated: Supporting "${found.name}"`);
+      }
+      navigate('dashboard');
+    }
+
+    function renderCharities() {
+      const grid = document.getElementById('charities-grid');
+      const searchVal = document.getElementById('charity-search') ? document.getElementById('charity-search').value.toLowerCase() : '';
+      grid.innerHTML = '';
+
+      const filtered = state.charities.filter(ch => {
+        const matchesCat = state.currentCharityFilter === 'all' || ch.category === state.currentCharityFilter;
+        const matchesSearch = ch.name.toLowerCase().includes(searchVal) || ch.description.toLowerCase().includes(searchVal);
+        return matchesCat && matchesSearch;
+      });
+
+      filtered.forEach(ch => {
+        const isSelected = state.user.charityId === ch.id;
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between";
+        card.innerHTML = `
+          <div>
+            <div class="h-44 w-full bg-slate-200 overflow-hidden relative">
+              <img src="${ch.image}" alt="${ch.name}" class="w-full h-full object-cover">
+              <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-slate-900/80 backdrop-blur text-white text-[10px] font-bold">
+                ${ch.category}
+              </span>
+            </div>
+            <div class="p-5 space-y-2.5">
+              <h3 class="font-bold text-slate-900 text-base leading-snug">${ch.name}</h3>
+              <p class="text-slate-500 text-xs line-clamp-2 leading-relaxed">${ch.description}</p>
+              <div class="pt-2 text-[11px] font-medium text-emerald-700">
+                📅 ${ch.nextEvent}
+              </div>
+            </div>
+          </div>
+          <div class="p-5 pt-0">
+            <button onclick="selectCharityForUser('${ch.id}')" class="w-full py-2.5 rounded-xl font-semibold text-xs transition ${
+              isSelected ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-900 text-white hover:bg-slate-800'
+            }">
+              ${isSelected ? '✓ Currently Supporting' : 'Select As My Charity'}
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    /* ==========================================================================
+       ADMIN SUITE & SIMULATION (PRD § 06 & § 11)
+       ========================================================================== */
+    function switchAdminTab(tab) {
+      ['users', 'draws', 'winners', 'charity'].forEach(t => {
+        document.getElementById(`admin-tab-${t}`).classList.add('hidden');
+        document.getElementById(`admin-tab-btn-${t}`).className = "pb-3 px-4 font-semibold text-slate-500 hover:text-slate-800";
+      });
+      document.getElementById(`admin-tab-${tab}`).classList.remove('hidden');
+      document.getElementById(`admin-tab-btn-${tab}`).className = "pb-3 px-4 font-semibold text-brand-600 border-b-2 border-brand-600";
+    }
+
+    let simulatedDrawnNumbers = [];
+
+    function runDrawSimulation() {
+      const mode = document.getElementById('draw-mode-select').value;
+      const ballsContainer = document.getElementById('sim-drawn-balls');
+      ballsContainer.innerHTML = '';
+      simulatedDrawnNumbers = [];
+
+      // Generate 5 distinct numbers between 1 and 45
+      if (mode === 'random') {
+        const pool = Array.from({ length: 45 }, (_, i) => i + 1);
+        for (let i = 0; i < 5; i++) {
+          const randIdx = Math.floor(Math.random() * pool.length);
+          simulatedDrawnNumbers.push(pool.splice(randIdx, 1)[0]);
+        }
+      } else {
+        // Weighted mock frequency
+        simulatedDrawnNumbers = [14, 22, 28, 34, 41];
+      }
+
+      simulatedDrawnNumbers.sort((a, b) => a - b);
+
+      simulatedDrawnNumbers.forEach(n => {
+        const ball = document.createElement('span');
+        ball.className = "w-8 h-8 rounded-full bg-brand-500 text-white font-bold text-xs flex items-center justify-center";
+        ball.innerText = n;
+        ballsContainer.appendChild(ball);
+      });
+
+      // Calculate matches against current mock user's scores
+      const userScores = state.user.scores.map(s => s.score);
+      const matches = simulatedDrawnNumbers.filter(n => userScores.includes(n)).length;
+
+      document.getElementById('sim-result-box').classList.remove('hidden');
+      showToast(`Simulation complete: ${matches} matching scores with test user.`);
+    }
+
+    function publishOfficialDraw() {
+      showToast('Official Draw published! Winners notified in dashboard.');
+      document.getElementById('winner-banner').classList.remove('hidden');
+    }
+
+    function approveWinnerPayout() {
+      state.user.payoutStatus = 'Paid';
+      showToast('Winner approved! Payout of $380 marked as PAID.');
+      renderAll();
+    }
+
+    function rejectWinnerProof() {
+      state.user.payoutStatus = 'Rejected';
+      showToast('Proof rejected. User requested to re-upload.');
+      renderAll();
+    }
+
+    /* ==========================================================================
+       MODALS & SUBSCRIPTION
+       ========================================================================== */
+    function openSubscriptionModal() {
+      document.getElementById('sub-modal').classList.remove('hidden');
+    }
+    function closeSubscriptionModal() {
+      document.getElementById('sub-modal').classList.add('hidden');
+    }
+    function selectPlan(plan) {
+      state.selectedPlanModal = plan;
+      const m = document.getElementById('plan-opt-monthly');
+      const y = document.getElementById('plan-opt-yearly');
+      if (plan === 'monthly') {
+        m.className = "p-4 rounded-2xl border-2 border-brand-600 bg-brand-50/50 cursor-pointer space-y-2";
+        y.className = "p-4 rounded-2xl border-2 border-slate-200 cursor-pointer space-y-2 hover:border-slate-300";
+      } else {
+        y.className = "p-4 rounded-2xl border-2 border-brand-600 bg-brand-50/50 cursor-pointer space-y-2";
+        m.className = "p-4 rounded-2xl border-2 border-slate-200 cursor-pointer space-y-2 hover:border-slate-300";
+      }
+    }
+    function confirmSubscription() {
+      state.user.plan = state.selectedPlanModal === 'monthly' ? 'Monthly' : 'Yearly';
+      state.user.planRate = state.selectedPlanModal === 'monthly' ? 20 : 200;
+      state.user.subscribed = true;
+      closeSubscriptionModal();
+      showToast(`Subscribed to ${state.user.plan} plan ($${state.user.planRate}). Welcome!`);
+      renderAll();
+    }
+
+    function openProofModal() {
+      document.getElementById('proof-modal').classList.remove('hidden');
+    }
+    function closeProofModal() {
+      document.getElementById('proof-modal').classList.add('hidden');
+    }
+    function submitProofFile() {
+      const input = document.getElementById('proof-file-input');
+      if (!input.files || input.files.length === 0) {
+        showToast('Please select a screenshot image first.');
+        return;
+      }
+      state.user.proofUploaded = true;
+      state.user.payoutStatus = 'Pending Audit';
+      closeProofModal();
+      showToast('Proof submitted for review! Admin will verify shortly.');
+      renderAll();
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.className = "fixed bottom-6 right-6 z-50 max-w-sm px-4 py-3 rounded-xl shadow-lg border bg-slate-900 text-white border-slate-700 text-xs font-medium flex items-center space-x-2";
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3800);
+    }
+
+    /* ==========================================================================
+       RENDER SUITE
+       ========================================================================== */
+    function renderAll() {
+      renderScores();
+      renderCharities();
+
+      // Dashboard Plan & Charity
+      const badge = document.getElementById('dash-plan-badge');
+      if (badge) {
+        badge.innerText = `Active: ${state.user.plan} Plan ($${state.user.planRate})`;
+      }
+      const charityObj = state.charities.find(c => c.id === state.user.charityId);
+      if (charityObj) {
+        document.getElementById('dash-charity-name').innerText = charityObj.name;
+      }
+      updateCharityPercentage(state.user.charityPercentage);
+
+      // Payout status
+      const payoutBadge = document.getElementById('dash-payout-status');
+      payoutBadge.innerText = state.user.payoutStatus;
+      if (state.user.payoutStatus === 'Paid') {
+        payoutBadge.className = "px-2.5 py-1 text-xs font-bold rounded-md bg-emerald-100 text-emerald-800";
+      } else {
+        payoutBadge.className = "px-2.5 py-1 text-xs font-bold rounded-md bg-amber-100 text-amber-800";
+      }
+
+      // Admin Users Table
+      const userTable = document.getElementById('admin-user-table');
+      if (userTable) {
+        userTable.innerHTML = `
+          <tr class="hover:bg-slate-50">
+            <td class="p-3 font-semibold text-slate-800">${state.user.name}<br><span class="text-slate-400 font-normal text-[11px]">${state.user.email}</span></td>
+            <td class="p-3"><span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-semibold text-[11px]">${state.user.plan}</span></td>
+            <td class="p-3 text-slate-700">${charityObj ? charityObj.name : 'None'}</td>
+            <td class="p-3 font-bold text-slate-800">${state.user.charityPercentage}%</td>
+            <td class="p-3 font-semibold text-slate-700">${state.user.scores.length} / 5</td>
+            <td class="p-3 text-right">
+              <button onclick="navigate('dashboard')" class="text-brand-600 font-bold hover:underline">Edit Scores</button>
+            </td>
+          </tr>
+        `;
+      }
+
+      // Admin Winners Table
+      const winTable = document.getElementById('admin-winner-table');
+      if (winTable) {
+        winTable.innerHTML = `
+          <tr class="hover:bg-slate-50">
+            <td class="p-3 font-semibold text-slate-800">${state.user.name}</td>
+            <td class="p-3 font-bold text-blue-600">4-Match (Tier 2)</td>
+            <td class="p-3 font-extrabold text-slate-900">$380.00</td>
+            <td class="p-3 text-slate-500">score_card_sep26.png</td>
+            <td class="p-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${
+                state.user.payoutStatus === 'Paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+              }">
+                ${state.user.payoutStatus}
+              </span>
+            </td>
+            <td class="p-3 text-right space-x-2">
+              <button onclick="approveWinnerPayout()" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[11px] font-semibold">Approve</button>
+              <button onclick="rejectWinnerProof()" class="px-2.5 py-1 bg-rose-500 hover:bg-rose-600 text-white rounded text-[11px] font-semibold">Reject</button>
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    // Initialize application on load
+    document.addEventListener('DOMContentLoaded', () => {
+      renderAll();
+    });
+  </script>
+</body>
+</html>
